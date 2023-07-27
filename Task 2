@@ -1,0 +1,59 @@
+import unittest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+
+class AddUsersTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+        self.driver.maximize_window()
+        self.driver.get("http://www.way2automation.com/angularjs-protractor/webtables/")
+
+    def tearDown(self):
+        self.driver.quit()
+
+    def test_add_users(self):
+        driver = self.driver
+
+        # Validate that you are on the User List Table
+        self.assertIn("User List", driver.title)
+
+        # Click Add user
+        driver.find_element(By.CSS_SELECTOR, "button[ng-click='pop()']").click()
+
+        # Add the first user
+        self.add_user("FName1", "LName1", "User1", "Pass1", "Company AAA", "Admin", "admin@mail.com", "082555")
+
+        # Add the second user
+        self.add_user("FName2", "LName2", "User2", "Pass2", "Company BBB", "Customer", "customer@mail.com", "083444")
+
+        # Ensure that users are added to the list
+        user_table = driver.find_element(By.CSS_SELECTOR, "table.table")
+        rows = user_table.find_elements(By.TAG_NAME, "tr")
+        self.assertEqual(len(rows), 3)  # There should be a header row and two user rows
+
+    def add_user(self, first_name, last_name, username, password, company, role, email, cell):
+        driver = self.driver
+
+        driver.find_element(By.NAME, "FirstName").send_keys(first_name)
+        driver.find_element(By.NAME, "LastName").send_keys(last_name)
+        driver.find_element(By.NAME, "UserName").send_keys(username)
+        driver.find_element(By.NAME, "Password").send_keys(password)
+        driver.find_element(By.NAME, "optionsRadios").click()
+
+        # Select Company from dropdown
+        select_company = Select(driver.find_element(By.ID, "optionsRadios"))
+        select_company.select_by_visible_text(company)
+
+        # Select Role from dropdown
+        select_role = Select(driver.find_element(By.ID, "Role"))
+        select_role.select_by_visible_text(role)
+
+        driver.find_element(By.NAME, "Email").send_keys(email)
+        driver.find_element(By.NAME, "Mobilephone").send_keys(cell)
+
+        driver.find_element(By.CSS_SELECTOR, "button.btn").click()
+
+if __name__ == "__main__":
+    unittest.main()
